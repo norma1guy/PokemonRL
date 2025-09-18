@@ -1,43 +1,49 @@
 import  {BattleStream,getPlayerStreams,Teams} from 'pokemon-showdown'
 import { RandomPlayerAI } from './PlayerAI'
 
-const allPokemonData = require('./Data/pokedex.json')
-const allMovesData = require('./Data/moves.json') 
-const namesPokemon = Object.keys(allPokemonData)
-const allMoves = Object.keys(allMovesData)
+export async function startBattle(): Promise<string>{
+    const battleStream = new BattleStream();
+    const streams = getPlayerStreams(battleStream);
+    const logs: string[] = [];
+    const spec = {
+        formatid: "gen9randombattle",
+    };
 
-const streams = getPlayerStreams(new BattleStream());
+    const p1spec = {
+        name: "Alice",
+        team : Teams.pack(Teams.generate('gen9randombattle')),
+    };
 
-const spec = {
-    formatid: "gen9randombattle",
-};
+    const p2spec = {
+        name : "Ben",
+        team : Teams.pack(Teams.generate('gen9randombattle')),
+    };
 
-const p1spec = {
-    name: "Alice",
-    team : Teams.pack(Teams.generate('gen9randombattle')),
-};
+    const p1 = new RandomPlayerAI(streams.p1);
+    const p2 = new RandomPlayerAI(streams.p2);
 
-const p2spec = {
-    name : "Ben",
-    team : Teams.pack(Teams.generate('gen9randombattle')),
-};
+    console.log("p1 is " + p1.constructor.name);
+    console.log("p2 is " + p2.constructor.name);
 
-const p1 = new RandomPlayerAI(streams.p1);
-const p2 = new RandomPlayerAI(streams.p2);
+    const p1AI = p1.start();
+    const p2AI =p2.start();
 
-console.log("p1 is " + p1.constructor.name);
-console.log("p2 is " + p2.constructor.name);
+    const battleLog =  (async () => {
+        for await (const chunk of streams.omniscient){
+            //console.log(chunk);
+            logs.push(chunk);
+        }
+    })();
 
-void p1.start();
-void p2.start();
+    battleStream.write(`>start ${JSON.stringify(spec)}\n` +
+    `>player p1 ${JSON.stringify(p1spec)}\n` +
+    `>player p2 ${JSON.stringify(p2spec)}\n`);
 
-void (async () => {
-    for await (const chunk of streams.omniscient){
-        console.log(chunk);
-    }
-})();
+    await Promise.all([p1AI,p2AI,battleLog]);
+    //console.log(logs.join("\n"));
+    return logs.join("\n");
+}
 
-void streams.omniscient.write(`>start ${JSON.stringify(spec)}
->player p1 ${JSON.stringify(p1spec)}
->player p2 ${JSON.stringify(p2spec)}`);
+
+
 
