@@ -16,7 +16,18 @@ Making use of BattleSim to create the synthetic dataset for training the RL mode
 
 Making use of **`startBattle`** defined in **`BattleSim.ts`** we create a battle log between 2 AIs based on random choice.
 
-Using **`BattleLogs.ts`** we specify the number of battles we want to start and capture the logs.
+Using **`BattleLogs.ts`** we specify the number of battles we want to start and capture the logs. 
+For now it is 100 battles.
 ```
 npx ts-node BattleLog.ts
+```
+
+Using CMakeLists build the C++ file.
+
+```
+makedir build && cd build
+cmake ..
+make clean
+make
+./bot
 ```

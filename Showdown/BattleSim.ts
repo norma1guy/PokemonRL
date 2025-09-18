@@ -22,15 +22,11 @@ export async function startBattle(): Promise<string>{
     const p1 = new RandomPlayerAI(streams.p1);
     const p2 = new RandomPlayerAI(streams.p2);
 
-    console.log("p1 is " + p1.constructor.name);
-    console.log("p2 is " + p2.constructor.name);
-
     const p1AI = p1.start();
     const p2AI =p2.start();
 
     const battleLog =  (async () => {
         for await (const chunk of streams.omniscient){
-            //console.log(chunk);
             logs.push(chunk);
         }
     })();
@@ -40,7 +36,6 @@ export async function startBattle(): Promise<string>{
     `>player p2 ${JSON.stringify(p2spec)}\n`);
 
     await Promise.all([p1AI,p2AI,battleLog]);
-    //console.log(logs.join("\n"));
     return logs.join("\n");
 }
 
